@@ -1,0 +1,85 @@
+CREATE TABLE Department (
+department_id int ,
+department_name varchar(255),
+department_address varchar(255),
+department_code varchar(255)
+);
+
+insert into Department(department_id, department_name, department_address, department_code) 
+values(1, 'Cs', 'India', '101');
+
+insert into Department(department_id,department_name, department_address, department_code) 
+values(2, 'Ce', 'America', '102');
+
+insert into Department(department_id,department_name, department_address, department_code) 
+values(3, 'EE', 'Pakistan', '103');
+
+--------------------------------------------------------------------------------------
+
+Validations--
+
+@NotBlank
+@Length(max = 5, min = 2)
+@Size(max = 5, min = 2)
+@Email
+@Positive
+@Negative
+@PositiveOrZero
+@NegativeOrZero
+for Date--
+@Future
+@Past
+@FutureOrPresent
+@PastOrPresent
+@Pattern
+
+---------------------------------------------------------------------------------------
+Exception Handling
+
+1. In serviceImpl fetchDept method throws Exception of departmentNotFoundException.
+
+	public Department fetchOneDepartmentById(long id) throws DepartmentNotFoundException {
+			Optional<Department> deptByIdOPtional = departmentRepository.findById(id);
+			if(deptByIdOPtional.isPresent() == false) {
+				throw new DepartmentNotFoundException("Department Not Available.");
+			}
+			return deptByIdOPtional.get();
+		}
+		
+2.Create departmentNotFoundException class in err pkg which extends Exception and override 
+all constructors.
+3.Add throws exception after every method in flow ie in controller in service interface etc.
+----------------------------------------------------------------------------------------
+
+# Ab exception throw ho raha h aur message me bhi dikh raha h lekin bahut saare kachre k saath.
+
+1. DeptController jab "throws DepartmentNotFoundException" karta h to ek message aata h upar ki 
+process se, Humko sirf HttpStatus aur message dekhna h baaki ka kachra nahi.
+
+2. Iske liye hum 2 classes banayange ek error pkg me aur ek entity pkg me
+
+3. Err pkg wali class
+
+@ControllerAdvice
+@ResponseStatus
+public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionHandler{
+	
+	@ExceptionHandler(DepartmentNotFoundException.class)
+	public ResponseEntity<ErrorMessage> departmentNotFoundException(DepartmentNotFoundException exception, 
+													WebRequest request) {
+		//Agli class ErrorMessage ki hogi jo ki ek pojo h
+		ErrorMessage message = new ErrorMessage(HttpStatus.NOT_FOUND, exception.getMessage());	
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(message);
+	}
+}
+
+4. Pojo class
+
+public class ErrorMessage {
+	
+	private HttpStatus status;
+	private String message;
+	//constructor no args
+	//constructor with args
+	//getters and setters
+}
